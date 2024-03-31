@@ -1,0 +1,13 @@
+---
+title: "CompProject-AryanCode"
+author: "Aryan Patel"
+date: "2024-03-31"
+output: pdf_document
+---
+
+
+**Using Genius API to get song lyrics data for word2vector Model for RShiny Interactive Web App**
+```{r}
+
+```
+
