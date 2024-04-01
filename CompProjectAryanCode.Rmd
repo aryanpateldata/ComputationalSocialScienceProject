@@ -129,7 +129,7 @@ longest_lyrics_df$artist[3] = "Rae Sremmurd"
 ```{r}
 
 # A milli 
-url <- "https://www.shazam.com/song/1490348552/breaking-me"
+url <- "https://www.shazam.com/song/1508562516/heat-waves"
 
 
 page <- read_html(url)
@@ -148,8 +148,8 @@ longest_lyrics <- x[max_length_index, "lyrics_div"]
 
 
 new_row <- data.frame(lyrics = longest_lyrics,
-                      song = "Breaking Me",
-                      artist = "Topic , A7S"
+                      song = "Heat Waves",
+                      artist = "Glass Monkeys"
                       )
 
 
@@ -161,9 +161,16 @@ longest_lyrics_df <- rbind(longest_lyrics_df, new_row)
 
 
 ```{r}
-write.csv(longest_lyrics_df,"Data", row.names = TRUE)
+write.csv(longest_lyrics_df,"Data.csv", row.names = TRUE)
 ```
 
+```{r}
+library(tidytext)
+
+# Assuming longest_lyrics_df is your data frame containing lyrics in the column 'lyrics'
+
+x <- unnest_tokens(longest_lyrics_df, word, lyrics)
+```
 
 
 
@@ -281,7 +288,7 @@ model <- word2vec::word2vec(x = tolower(longest_lyrics_df$lyrics),
 
 
 ```{r}
-predict(model, c("breaking"), type = "nearest", top_n = 10)
+predict(model, c("yeah"), type = "nearest", top_n = 10)
 ```
 
 
