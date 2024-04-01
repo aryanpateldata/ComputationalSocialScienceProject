@@ -5,9 +5,283 @@ date: "2024-03-31"
 output: pdf_document
 ---
 
+```{r}
+library(httr)
+library(jsonlite)
+library(tidyverse)
+library(geniusr)
+```
 
-**Using Genius API to get song lyrics data for word2vector Model for RShiny Interactive Web App**
+
+
 ```{r}
 
+library(rvest)
+
+
+url <- "https://www.shazam.com/song/1524860628/wunna"
+
+
+page <- read_html(url)
+
+
+lyrics_div <- page %>%
+  html_elements(".Text-module_text-gray-900__Qcj0F") %>%
+  html_text()
+x <- as.data.frame(lyrics_div)
+
+
+max_length_index <- which.max(nchar(x$lyrics_div))
+
+
+longest_lyrics <- x[max_length_index, "lyrics_div"]
+
+
+longest_lyrics_df <- data.frame(lyrics = longest_lyrics, stringsAsFactors = FALSE)
+
+
+print(longest_lyrics_df)
+
+longest_lyrics_df$song = "Wunna"
+longest_lyrics_df$artist = "Gunna"
+
+
+
 ```
+
+```{r}
+
+url <- "https://www.shazam.com/en-us/song/1437955726/drip-too-hard"
+
+
+page <- read_html(url)
+
+
+lyrics_div <- page %>%
+  html_elements(".Text-module_text-gray-900__Qcj0F") %>%
+  html_text()
+x <- as.data.frame(lyrics_div)
+
+max_length_index <- which.max(nchar(x$lyrics_div))
+
+
+longest_lyrics <- x[max_length_index, "lyrics_div"]
+
+longest_lyrics
+
+
+new_row <- data.frame(lyrics = longest_lyrics,
+                      song = "Drip too Hard",
+                      artist = "Gunna and Lil Baby"
+                      )
+
+
+
+longest_lyrics_df <- rbind(longest_lyrics_df, new_row)
+
+```
+
+
+
+
+
+
+
+```{r} 
+
+# No type 
+url <- "https://www.shazam.com/song/1440816164/no-type"
+
+
+page <- read_html(url)
+
+
+lyrics_div <- page %>%
+  html_elements(".Text-module_text-gray-900__Qcj0F") %>%
+  html_text()
+x <- as.data.frame(lyrics_div)
+
+max_length_index <- which.max(nchar(x$lyrics_div))
+
+
+longest_lyrics <- x[max_length_index, "lyrics_div"]
+
+longest_lyrics
+
+
+new_row <- data.frame(lyrics = longest_lyrics,
+                      song = "No Type",
+                      artist = "Rae Sremmurd"
+                      )
+
+
+
+longest_lyrics_df <- rbind(longest_lyrics_df, new_row)
+
+```
+```{r}
+longest_lyrics_df$song[3] = "No Type"
+longest_lyrics_df$artist[3] = "Rae Sremmurd"
+```
+
+
+
+```{r}
+
+# A milli 
+url <- "https://www.shazam.com/song/1490348552/breaking-me"
+
+
+page <- read_html(url)
+
+
+lyrics_div <- page %>%
+  html_elements(".Text-module_text-gray-900__Qcj0F") %>%
+  html_text()
+x <- as.data.frame(lyrics_div)
+
+max_length_index <- which.max(nchar(x$lyrics_div))
+
+
+longest_lyrics <- x[max_length_index, "lyrics_div"]
+
+
+
+new_row <- data.frame(lyrics = longest_lyrics,
+                      song = "Breaking Me",
+                      artist = "Topic , A7S"
+                      )
+
+
+
+longest_lyrics_df <- rbind(longest_lyrics_df, new_row)
+```
+
+
+
+
+```{r}
+write.csv(longest_lyrics_df,"Data", row.names = TRUE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+library(word2vec)
+```
+
+
+```{r}
+model <- word2vec::word2vec(x = tolower(longest_lyrics_df$lyrics), 
+                  type="cbow",# continuous bag of words
+                  dim=100, # 100-dim output vectors
+                  window = 3L, # window size 3
+                  iter = 10L, # train over 10 iterations
+                  negative= 10L,# 10 negative samples for each positive sample
+                  min_count = 10L) # Drop words less than 10 times
+```
+
+
+
+```{r}
+predict(model, c("breaking"), type = "nearest", top_n = 10)
+```
+
 
