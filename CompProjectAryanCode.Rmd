@@ -14,40 +14,7 @@ library(geniusr)
 
 
 
-```{r}
 
-library(rvest)
-
-
-url <- "https://www.shazam.com/song/1524860628/wunna"
-
-
-page <- read_html(url)
-
-
-lyrics_div <- page %>%
-  html_elements(".Text-module_text-gray-900__Qcj0F") %>%
-  html_text()
-x <- as.data.frame(lyrics_div)
-
-
-max_length_index <- which.max(nchar(x$lyrics_div))
-
-
-longest_lyrics <- x[max_length_index, "lyrics_div"]
-
-
-longest_lyrics_df <- data.frame(lyrics = longest_lyrics, stringsAsFactors = FALSE)
-
-
-print(longest_lyrics_df)
-
-longest_lyrics_df$song = "Wunna"
-longest_lyrics_df$artist = "Gunna"
-
-
-
-```
 
 ```{r}
 
@@ -124,53 +91,149 @@ longest_lyrics_df$song[3] = "No Type"
 longest_lyrics_df$artist[3] = "Rae Sremmurd"
 ```
 
+```{r}
+library(dplyr)
+data <- read.csv('Data.csv')
+
+data <- data |>
+  select(lyrics,song,artist)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ```{r}
+library(rvest)
 
-# A milli 
-url <- "https://www.shazam.com/song/1508562516/heat-waves"
+
+
+# Code below will scrape lyrics, title, song name from Shazam and add to our dataset
+
+url <- "https://www.shazam.com/de-de/song/1440825283/love-me-harder"
 
 
 page <- read_html(url)
 
 
+song_title <- page %>%
+  html_element("h1.TrackPageHeader_title__wGI_Q") %>%
+  html_text() %>%
+  trimws()
+
+
+artist_name <- page %>%
+  html_element("span.TrackPageHeader_link__q0Id5") %>%
+  html_text() %>%
+  trimws()
+
+
 lyrics_div <- page %>%
   html_elements(".Text-module_text-gray-900__Qcj0F") %>%
   html_text()
-x <- as.data.frame(lyrics_div)
-
-max_length_index <- which.max(nchar(x$lyrics_div))
 
 
-longest_lyrics <- x[max_length_index, "lyrics_div"]
+max_length_index <- which.max(nchar(lyrics_div))
 
+
+longest_lyrics <- lyrics_div[max_length_index]
 
 
 new_row <- data.frame(lyrics = longest_lyrics,
-                      song = "Heat Waves",
-                      artist = "Glass Monkeys"
-                      )
+                      song = song_title,
+                      artist = artist_name)
 
 
 
-longest_lyrics_df <- rbind(longest_lyrics_df, new_row)
+
+  data <- rbind(data, new_row)
+
+
+
+
 ```
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ```{r}
-write.csv(longest_lyrics_df,"Data.csv", row.names = TRUE)
+write.csv(data,"Data.csv", row.names = TRUE)
 ```
 
 ```{r}
 library(tidytext)
+library(tokenizers)
 
 # Assuming longest_lyrics_df is your data frame containing lyrics in the column 'lyrics'
 
-x <- unnest_tokens(longest_lyrics_df, word, lyrics)
+# Tokenize the text into trigrams
+x <- data %>%
+  unnest_tokens(trigram, lyrics, token = "ngrams", n = 10)
 ```
+
+
+
+
+
+
+
+
+
 
 
 
@@ -276,7 +339,7 @@ library(word2vec)
 
 
 ```{r}
-model <- word2vec::word2vec(x = tolower(longest_lyrics_df$lyrics), 
+model <- word2vec::word2vec(x = tolower(x$trigram), 
                   type="cbow",# continuous bag of words
                   dim=100, # 100-dim output vectors
                   window = 3L, # window size 3
@@ -288,7 +351,109 @@ model <- word2vec::word2vec(x = tolower(longest_lyrics_df$lyrics),
 
 
 ```{r}
-predict(model, c("yeah"), type = "nearest", top_n = 10)
+ results <- as.data.frame(predict(model, c("money"), type = "nearest", top_n = 30))
+
+results
 ```
+
+
+
+
+
+
+
+```{r}
+library(stringdist)
+
+# Function to extract last part of a word and calculate its soundex
+get_last_soundex <- function(word) {
+  last_part <- tail(strsplit(word, "")[[1]], 2)
+  soundex(last_part)
+}
+
+# Function to find rhyming words using last part Soundex comparison
+find_rhymes_last_soundex <- function(target_word, similar_words, cmudict) {
+  target_phonetic <- extract_phonetic(target_word, cmudict)
+  if (is.null(target_phonetic)) {
+    stop("Target word not found in CMU Pronouncing Dictionary")
+  }
+  target_soundex <- get_last_soundex(target_word)
+  rhymes <- sapply(similar_words, function(word) {
+    word_phonetic <- extract_phonetic(word, cmudict)
+    if (!is.null(word_phonetic)) {
+      last_soundex <- get_last_soundex(word)
+      identical(target_soundex, last_soundex)
+    } else {
+      FALSE
+    }
+  })
+  return(similar_words[rhymes])
+}
+
+# Example data
+target_word <- "cool"
+similar_words <- c("bool", "hey", "play", "day", "away", "say")
+
+# Find rhyming words
+rhyming_words <- find_rhymes_last_soundex(target_word, similar_words, cmudict)
+
+# Print rhyming words
+print(rhyming_words)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+phon::rhymes("backpack", min_phonemes = 2)
+```
+
+
+
+
+```{r}
+# Function to check if two words rhyme
+check_rhyme <- function(word1, word2, cmudict_df) {
+  # Get ARPAbet codes for both words
+  arpabet1 <- cmudict_df$arpabet[cmudict_df$word == word1]
+  arpabet2 <- cmudict_df$arpabet[cmudict_df$word == word2]
+  
+  # Check if both words are found in the CMU Pronouncing Dictionary
+  if (length(arpabet1) == 0 || length(arpabet2) == 0) {
+    stop("Both words must be found in the CMU Pronouncing Dictionary to check for rhyme.")
+  }
+  
+  # Extract the last pieces of the ARPAbet codes
+  last_arpabet1 <- tail(strsplit(arpabet1, "\\s+")[[1]], 1)
+  last_arpabet2 <- tail(strsplit(arpabet2, "\\s+")[[1]], 1)
+  
+  # Check if the last pieces match
+  return(last_arpabet1 == last_arpabet2)
+}
+
+# Example usage to test if two words rhyme
+word1 <- "cool"
+word2 <- "fool"
+if (check_rhyme(word1, word2, cmudict_df)) {
+  print(paste(word1, "and", word2, "rhyme!"))
+} else {
+  print(paste(word1, "and", word2, "do not rhyme."))
+}
+
+
+```
+
+
 
 
