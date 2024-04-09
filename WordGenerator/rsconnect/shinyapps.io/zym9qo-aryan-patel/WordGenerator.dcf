@@ -1,0 +1,12 @@
+name: WordGenerator
+title: WordGenerator
+username: zym9qo-aryan-patel
+account: zym9qo-aryan-patel
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 11714279
+bundleId: 8474212
+url: https://zym9qo-aryan-patel.shinyapps.io/WordGenerator/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
