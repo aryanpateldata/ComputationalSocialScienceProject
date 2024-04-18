@@ -1,7 +1,10 @@
 library(shiny)
 library(ggplot2)
-library(word2vec)
+library(readr)
 
+# Load pre-computed similarity matrix from GitHub raw link
+similarity_matrix_url <- "https://github.com/apat010/ComputationalSocialScienceProject/raw/main/WordGenerator/similarity_matrix.rds"
+similarity_matrix <- readRDS(url(similarity_matrix_url))
 
 ui <- fluidPage(
   titlePanel("Word Similarity Predictor"),
@@ -13,67 +16,55 @@ ui <- fluidPage(
     mainPanel(
       plotOutput("similar_words_plot"),
       tableOutput("similar_words_table")
-      )
+    )
   )
 )
 
-
 server <- function(input, output) {
   observeEvent(input$predict_button, {
-
-    data <- read.csv("data.csv")
-    
-
-    data <- as.data.frame(data)
-    
-
-    data$lyrics <- tolower(data$lyrics)
-    
-
-    model <- word2vec(x = data$lyrics, 
-                      type = "cbow",
-                      dim = 100,
-                      window = 3,
-                      iter = 10,
-                      negative = 10,
-                      min_count = 10)
-    
-
     input_word <- input$input_word
     
-
-    similar_words <- predict(model, input_word, type = "nearest", top_n = 10)
+    # Check if the input word exists in the vocabulary
+    if (!(input_word %in% rownames(similarity_matrix))) {
+      output$similar_words_plot <- renderPlot({
+        ggplot() +
+          geom_bar(stat = "identity", fill = "red", aes(x = "", y = 0)) +
+          labs(title = "Word Not Found", x = "", y = "") +
+          theme_void()
+      })
+      
+      output$similar_words_table <- renderTable({
+        data.frame(Word = character(0), Similarity = numeric(0))
+      })
+      
+      return()
+    }
     
-
-    similar_words_df <- similar_words[[1]]
+    # Get similar words and their similarities from the similarity matrix
+    similar_words_indices <- order(similarity_matrix[input_word, ], decreasing = TRUE)[1:10]
+    similar_words <- rownames(similarity_matrix)[similar_words_indices]
+    similarity_scores <- similarity_matrix[input_word, similar_words_indices]
     
+    similar_words_df <- data.frame(Word = similar_words, Similarity = similarity_scores)
     
-    similar_words_df <- similar_words_df[order(similar_words_df$similarity, decreasing = TRUE),]
-    
-
     output$similar_words_plot <- renderPlot({
-      ggplot(similar_words_df, aes(x = similar_words_df[,2], y = similar_words_df[,3])) +
-        geom_bar(stat = "identity", fill="green") +
+      ggplot(similar_words_df, aes(x = Word, y = Similarity)) +
+        geom_bar(stat = "identity", fill = "green") +
         labs(title = paste("Top Similar Words to '", input_word, "'"), x = "Word", y = "Similarity Score") +
-        theme_classic()+ 
+        theme_classic() + 
         theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 15),
               axis.text.y = element_text(size = 15),
               plot.title = element_text(face = "bold", size = 25))
- 
-      })
- 
+    })
+    
     output$similar_words_table <- renderTable({
       similar_words_df
     })  
-  
- })
-  
-  
+  })
   
   output$instruction <- renderText({
     "Enter a word and click 'Predict' to find the closest words."
   })
 }
-
 
 shinyApp(ui = ui, server = server)
