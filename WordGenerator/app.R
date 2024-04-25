@@ -1,14 +1,17 @@
+# Libraries required for Shiny app
 library(shiny)
 library(ggplot2)
 library(readr)
 library(gtsummary)
-library(dplyr)  # Load the dplyr package for piping
+library(dplyr)
 library(gt)
 library(scales)
-# Load pre-computed similarity matrix from GitHub raw link
+
+# Load similarity matrix
 similarity_matrix_url <- "https://github.com/apat010/ComputationalSocialScienceProject/raw/main/WordGenerator/similarity_matrix.rds"
 similarity_matrix <- readRDS(url(similarity_matrix_url))
 
+# UI layout
 ui <- fluidPage(
   titlePanel("Word Similarity Predictor"),
   sidebarLayout(
@@ -17,12 +20,14 @@ ui <- fluidPage(
       actionButton("predict_button", "Predict")
     ),
     mainPanel(
+      htmlOutput("display_image"),
       plotOutput("similar_words_plot"),
-      tableOutput("similar_words_table")
+      uiOutput("similar_words_table")
     )
   )
 )
 
+# Server logic
 server <- function(input, output) {
   observeEvent(input$predict_button, {
     input_word <- input$input_word
@@ -60,21 +65,46 @@ server <- function(input, output) {
               plot.title = element_text(face = "bold", size = 25))
     })
     
- 
-    
     output$similar_words_table <- renderUI({
-      similar_words_df %>%
-        select(Word, Similarity) %>%
-        gt() %>%
+      similar_words_df |>
+        select(Word, Similarity) |>
+        gt() |>
         tab_header(
           title = "Similarity Table",
           subtitle = "Table showing most similar words to the inputted word"
-        ) %>%
+        ) |>
+        
+        tab_style(
+          style = cell_text(weight = "bold"),
+          locations = cells_title(groups = "title")
+        ) |>
+        
+        
+        
         tab_style(
           style = list(cell_fill(color = "#33FF66"),
                        cell_text(weight = "bold")),
           locations = cells_body(columns = Similarity)
-        )
+        ) |> 
+        
+        tab_style(
+          style = cell_text(weight = "bold"), 
+          locations = cells_body(columns = Word)
+        ) |>
+        
+        
+        tab_style(
+          style = cell_text(weight = "bold"), 
+          locations = cells_column_labels(columns = everything()))
+      
+      
+    })
+    
+    # Display the image in the output
+    output$display_image <- renderUI({
+      img(src = "https://raw.githubusercontent.com/apat010/ComputationalSocialScienceProject/baebf0c7b551be07f80fb06f35c39eb54216a7a4/WordGenerator/Screenshot%202024-04-25%20at%2011.18.26%E2%80%AFAM.png", 
+          alt = "Logo", 
+          width = "75%")  # Adjust the size as needed
     })
     
   })
