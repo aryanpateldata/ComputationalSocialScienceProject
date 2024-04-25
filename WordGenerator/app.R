@@ -11,6 +11,7 @@ library(scales)
 similarity_matrix_url <- "https://github.com/apat010/ComputationalSocialScienceProject/raw/main/WordGenerator/similarity_matrix.rds"
 similarity_matrix <- readRDS(url(similarity_matrix_url))
 
+
 # UI layout
 ui <- fluidPage(
   titlePanel("Word Similarity Predictor"),
@@ -20,7 +21,10 @@ ui <- fluidPage(
       actionButton("predict_button", "Predict")
     ),
     mainPanel(
-      htmlOutput("display_image"),
+      # Display the image from the beginning
+      tags$img(src = "https://raw.githubusercontent.com/apat010/ComputationalSocialScienceProject/baebf0c7b551be07f80fb06f35c39eb54216a7a4/WordGenerator/Screenshot%202024-04-25%20at%2011.18.26%E2%80%AFAM.png",
+               alt = "Logo",
+               width = "75%"),  # Adjust the size as needed
       plotOutput("similar_words_plot"),
       uiOutput("similar_words_table")
     )
@@ -100,12 +104,7 @@ server <- function(input, output) {
       
     })
     
-    # Display the image in the output
-    output$display_image <- renderUI({
-      img(src = "https://raw.githubusercontent.com/apat010/ComputationalSocialScienceProject/baebf0c7b551be07f80fb06f35c39eb54216a7a4/WordGenerator/Screenshot%202024-04-25%20at%2011.18.26%E2%80%AFAM.png", 
-          alt = "Logo", 
-          width = "75%")  # Adjust the size as needed
-    })
+
     
   })
   
