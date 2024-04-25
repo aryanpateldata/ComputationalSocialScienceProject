@@ -4,6 +4,7 @@ library(readr)
 library(gtsummary)
 library(dplyr)  # Load the dplyr package for piping
 library(gt)
+library(scales)
 # Load pre-computed similarity matrix from GitHub raw link
 similarity_matrix_url <- "https://github.com/apat010/ComputationalSocialScienceProject/raw/main/WordGenerator/similarity_matrix.rds"
 similarity_matrix <- readRDS(url(similarity_matrix_url))
@@ -59,11 +60,23 @@ server <- function(input, output) {
               plot.title = element_text(face = "bold", size = 25))
     })
     
+ 
+    
     output$similar_words_table <- renderUI({
       similar_words_df %>%
         select(Word, Similarity) %>%
-        gt()
-    })  
+        gt() %>%
+        tab_header(
+          title = "Similarity Table",
+          subtitle = "Table showing most similar words to the inputted word"
+        ) %>%
+        tab_style(
+          style = list(cell_fill(color = "#33FF66"),
+                       cell_text(weight = "bold")),
+          locations = cells_body(columns = Similarity)
+        )
+    })
+    
   })
   
   output$instruction <- renderText({
