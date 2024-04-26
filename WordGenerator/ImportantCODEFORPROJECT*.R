@@ -2,6 +2,8 @@ library(word2vec)
 library(readr)
 
 
+#the code below will create embedding, similarity matrix from the model and save to directory
+
 save_path <- "/Users/aryanpatel/Documents/Aryan:Classes:SOC360/ComputionalProjectAryanandGurnit/CompProject/WordGenerator/app2/word_embeddings_model.rds"
 
 # Load data

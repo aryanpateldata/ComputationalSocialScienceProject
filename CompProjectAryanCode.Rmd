@@ -13,6 +13,15 @@ library(geniusr)
 ```
 
 
+```{r}
+library (readr)
+
+
+
+
+urllfile <- "https://raw.githubusercontent.com/apat010/ComputationalSocialScienceProject/main/WordGenerator/Data.csv"
+data<-read_csv(url(urllfile))
+```
 
 
 
@@ -120,7 +129,7 @@ library(rvest)
 
 # Code below will scrape lyrics, title, song name from Shazam and add to our dataset
 
-url <- "https://www.shazam.com/de-de/song/1440825283/love-me-harder"
+url <- ""
 
 
 page <- read_html(url)
@@ -219,11 +228,11 @@ write.csv(data,"Data.csv", row.names = TRUE)
 library(tidytext)
 library(tokenizers)
 
-# Assuming longest_lyrics_df is your data frame containing lyrics in the column 'lyrics'
 
-# Tokenize the text into trigrams
-x <- data %>%
-  unnest_tokens(trigram, lyrics, token = "ngrams", n = 10)
+
+
+x.12 <- df_processed %>%
+  unnest_tokens(gram, lyrics, token = "ngrams", n = 10)
 ```
 
 
@@ -233,6 +242,16 @@ x <- data %>%
 
 
 
+```{r}
+library(dplyr)
+
+data1 <- data |>
+    mutate(lyrics = gsub("#[A-Za-z0-9]+|@[A-Za-z0-9]", "", lyrics)) |> # Removing hashtags and mentions
+    mutate(lyrics = gsub("(http[^ ]*)|(www.[^ ]*)", "", lyrics)) |> # Removing URLs
+    mutate(lyrics = gsub("’", "'", lyrics)) |> # Replacing special character
+    distinct(lyrics, .keep_all = TRUE) # Removing duplicates
+
+```
 
 
 
@@ -241,11 +260,53 @@ x <- data %>%
 
 
 
+```{r}
+library(ggplot2)
+x.12 %>% count(gram, sort = TRUE) %>%
+  slice(1:30) %>%
+  mutate(gram = reorder(gram, n)) %>%
+  ggplot(aes(n, gram)) + geom_col() +
+  labs(y = NULL, x='Term frequency', title=paste("30 most frequent terms in corpus"))
+```
+
+
+
+
+```{r}
+data("stop_words")
+```
 
 
 
 
 
+
+
+
+```{r}
+data(stop_words) 
+
+stop_words <- stop_words
+
+# Add "amp" to the stop words list
+stop_words <- stop_words %>% 
+  bind_rows(tibble(word = ""))
+
+# Filter stop words based on the 'lexicon' column
+stop_words <- stop_words %>% 
+  filter(lexicon == "snowball")  # Modify if necessary
+
+# Function to remove stop words from a sentence
+remove_stopwords <- function(sentence) {
+  words <- strsplit(sentence, "\\s+")[[1]]
+  words <- words[!tolower(words) %in% stop_words$word]
+  return(paste(words, collapse = " "))
+}
+
+# Apply the function to remove stop words from the lyrics column
+df_processed <- data1 %>%
+  mutate(lyrics = sapply(lyrics, remove_stopwords))
+```
 
 
 
@@ -339,7 +400,7 @@ library(word2vec)
 
 
 ```{r}
-model <- word2vec::word2vec(x = tolower(x$trigram), 
+model <- word2vec::word2vec(x = tolower(df_processed$lyrics), 
                   type="cbow",# continuous bag of words
                   dim=100, # 100-dim output vectors
                   window = 3L, # window size 3
@@ -348,10 +409,18 @@ model <- word2vec::word2vec(x = tolower(x$trigram),
                   min_count = 10L) # Drop words less than 10 times
 ```
 
+```{r}
+saveRDS(model, "word2vec_model.rds")
+```
 
 
 ```{r}
- results <- as.data.frame(predict(model, c("money"), type = "nearest", top_n = 30))
+saveRDS(model, file = "/Users/aryanpatel/Documents/Aryan:Classes:SOC360/ComputionalProjectAryanandGurnit/CompProject/WordGenerator/word2vec_model.rds")
+```
+
+
+```{r}
+ results <- as.data.frame(predict(model, c("gang"), type = "nearest", top_n = 30))
 
 results
 ```
