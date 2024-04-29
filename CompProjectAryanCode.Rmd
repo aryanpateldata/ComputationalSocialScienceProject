@@ -169,13 +169,82 @@ new_row <- data.frame(lyrics = longest_lyrics,
 
 
 
+##Gurnit
+
+
+```{r}
+# Read the CSV file into a DataFrame
+data <- read.csv("/Users/gurnit.sc/Desktop/ComputSoc/ComputationalSocialScienceProject/WordGenerator/Data.csv", stringsAsFactors = FALSE)
+
+# Check the first few rows to ensure it looks correct
+head(data)
+```
+
+```{r}
+# Copy data to data2
+data2 <- data
+
+# Verify the copy
+head(data2)
+```
+
+```{r}
+# Remove the 'X' column from data2
+data2 <- data2[, -which(names(data2) == "X")]
+
+```
+
+
+
+```{r}
+library(rvest)
+url <- ""
+
+
+page <- read_html(url)
+
+
+song_title <- page %>%
+  html_element("h1.TrackPageHeader_title__wGI_Q") %>%
+  html_text() %>%
+  trimws()
+artist_name <- page %>%
+  html_element("span.TrackPageHeader_link__q0Id5") %>%
+  html_text() %>%
+  trimws()
+
+
+lyrics_div <- page %>%
+  html_elements(".Text-module_text-gray-900__Qcj0F") %>%
+  html_text()
+
+
+max_length_index <- which.max(nchar(lyrics_div))
+
+
+longest_lyrics <- lyrics_div[max_length_index]
+
+
+new_row <- data.frame(lyrics = longest_lyrics,
+                      song = song_title,
+                      artist = artist_name)
 
 
 
 
+  data2 <- rbind(data2, new_row)
+
+
+```
+
+#data2[504, ]
 
 
 
+
+```{r}
+write.csv(data2, "data2.csv", row.names = FALSE)
+```
 
 
 
