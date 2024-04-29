@@ -1,0 +1,528 @@
+---
+title: "CompProject-AryanCode"
+author: "Aryan Patel"
+date: "2024-03-31"
+output: pdf_document
+---
+
+```{r}
+library(httr)
+library(jsonlite)
+library(tidyverse)
+library(geniusr)
+```
+
+
+
+
+
+```{r}
+
+url <- "https://www.shazam.com/en-us/song/1437955726/drip-too-hard"
+
+
+page <- read_html(url)
+
+
+lyrics_div <- page %>%
+  html_elements(".Text-module_text-gray-900__Qcj0F") %>%
+  html_text()
+x <- as.data.frame(lyrics_div)
+
+max_length_index <- which.max(nchar(x$lyrics_div))
+
+
+longest_lyrics <- x[max_length_index, "lyrics_div"]
+
+longest_lyrics
+
+
+new_row <- data.frame(lyrics = longest_lyrics,
+                      song = "Drip too Hard",
+                      artist = "Gunna and Lil Baby"
+                      )
+
+
+
+longest_lyrics_df <- rbind(longest_lyrics_df, new_row)
+
+```
+
+
+
+
+
+
+
+```{r} 
+
+# No type 
+url <- "https://www.shazam.com/song/1440816164/no-type"
+
+
+page <- read_html(url)
+
+
+lyrics_div <- page %>%
+  html_elements(".Text-module_text-gray-900__Qcj0F") %>%
+  html_text()
+x <- as.data.frame(lyrics_div)
+
+max_length_index <- which.max(nchar(x$lyrics_div))
+
+
+longest_lyrics <- x[max_length_index, "lyrics_div"]
+
+longest_lyrics
+
+
+new_row <- data.frame(lyrics = longest_lyrics,
+                      song = "No Type",
+                      artist = "Rae Sremmurd"
+                      )
+
+
+
+longest_lyrics_df <- rbind(longest_lyrics_df, new_row)
+
+```
+```{r}
+longest_lyrics_df$song[3] = "No Type"
+longest_lyrics_df$artist[3] = "Rae Sremmurd"
+```
+
+```{r}
+library(dplyr)
+data <- read.csv('Data.csv')
+
+data <- data |>
+  select(lyrics,song,artist)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+library(rvest)
+
+
+
+# Code below will scrape lyrics, title, song name from Shazam and add to our dataset
+
+url <- "https://www.shazam.com/de-de/song/1440825283/love-me-harder"
+
+
+page <- read_html(url)
+
+
+song_title <- page %>%
+  html_element("h1.TrackPageHeader_title__wGI_Q") %>%
+  html_text() %>%
+  trimws()
+
+
+artist_name <- page %>%
+  html_element("span.TrackPageHeader_link__q0Id5") %>%
+  html_text() %>%
+  trimws()
+
+
+lyrics_div <- page %>%
+  html_elements(".Text-module_text-gray-900__Qcj0F") %>%
+  html_text()
+
+
+max_length_index <- which.max(nchar(lyrics_div))
+
+
+longest_lyrics <- lyrics_div[max_length_index]
+
+
+new_row <- data.frame(lyrics = longest_lyrics,
+                      song = song_title,
+                      artist = artist_name)
+
+
+
+
+  data <- rbind(data, new_row)
+
+
+
+
+```
+
+
+
+
+
+
+
+##Gurnit
+
+
+```{r}
+# Read the CSV file into a DataFrame
+data <- read.csv("/Users/gurnit.sc/Desktop/ComputSoc/ComputationalSocialScienceProject/WordGenerator/Data.csv", stringsAsFactors = FALSE)
+
+# Check the first few rows to ensure it looks correct
+head(data)
+```
+
+```{r}
+# Copy data to data2
+data2 <- data
+
+# Verify the copy
+head(data2)
+```
+
+```{r}
+# Remove the 'X' column from data2
+data2 <- data2[, -which(names(data2) == "X")]
+
+```
+
+
+
+```{r}
+library(rvest)
+url <- ""
+
+
+page <- read_html(url)
+
+
+song_title <- page %>%
+  html_element("h1.TrackPageHeader_title__wGI_Q") %>%
+  html_text() %>%
+  trimws()
+artist_name <- page %>%
+  html_element("span.TrackPageHeader_link__q0Id5") %>%
+  html_text() %>%
+  trimws()
+
+
+lyrics_div <- page %>%
+  html_elements(".Text-module_text-gray-900__Qcj0F") %>%
+  html_text()
+
+
+max_length_index <- which.max(nchar(lyrics_div))
+
+
+longest_lyrics <- lyrics_div[max_length_index]
+
+
+new_row <- data.frame(lyrics = longest_lyrics,
+                      song = song_title,
+                      artist = artist_name)
+
+
+
+
+  data2 <- rbind(data2, new_row)
+
+
+```
+
+#data2[504, ]
+
+
+
+
+```{r}
+write.csv(data2, "data2.csv", row.names = FALSE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+write.csv(data,"Data.csv", row.names = TRUE)
+```
+
+```{r}
+library(tidytext)
+library(tokenizers)
+
+# Assuming longest_lyrics_df is your data frame containing lyrics in the column 'lyrics'
+
+# Tokenize the text into trigrams
+x <- data %>%
+  unnest_tokens(trigram, lyrics, token = "ngrams", n = 10)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+library(word2vec)
+```
+
+
+```{r}
+model <- word2vec::word2vec(x = tolower(x$trigram), 
+                  type="cbow",# continuous bag of words
+                  dim=100, # 100-dim output vectors
+                  window = 3L, # window size 3
+                  iter = 10L, # train over 10 iterations
+                  negative= 10L,# 10 negative samples for each positive sample
+                  min_count = 10L) # Drop words less than 10 times
+```
+
+
+
+```{r}
+ results <- as.data.frame(predict(model, c("money"), type = "nearest", top_n = 30))
+
+results
+```
+
+
+
+
+
+
+
+```{r}
+library(stringdist)
+
+# Function to extract last part of a word and calculate its soundex
+get_last_soundex <- function(word) {
+  last_part <- tail(strsplit(word, "")[[1]], 2)
+  soundex(last_part)
+}
+
+# Function to find rhyming words using last part Soundex comparison
+find_rhymes_last_soundex <- function(target_word, similar_words, cmudict) {
+  target_phonetic <- extract_phonetic(target_word, cmudict)
+  if (is.null(target_phonetic)) {
+    stop("Target word not found in CMU Pronouncing Dictionary")
+  }
+  target_soundex <- get_last_soundex(target_word)
+  rhymes <- sapply(similar_words, function(word) {
+    word_phonetic <- extract_phonetic(word, cmudict)
+    if (!is.null(word_phonetic)) {
+      last_soundex <- get_last_soundex(word)
+      identical(target_soundex, last_soundex)
+    } else {
+      FALSE
+    }
+  })
+  return(similar_words[rhymes])
+}
+
+# Example data
+target_word <- "cool"
+similar_words <- c("bool", "hey", "play", "day", "away", "say")
+
+# Find rhyming words
+rhyming_words <- find_rhymes_last_soundex(target_word, similar_words, cmudict)
+
+# Print rhyming words
+print(rhyming_words)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+phon::rhymes("backpack", min_phonemes = 2)
+```
+
+
+
+
+```{r}
+# Function to check if two words rhyme
+check_rhyme <- function(word1, word2, cmudict_df) {
+  # Get ARPAbet codes for both words
+  arpabet1 <- cmudict_df$arpabet[cmudict_df$word == word1]
+  arpabet2 <- cmudict_df$arpabet[cmudict_df$word == word2]
+  
+  # Check if both words are found in the CMU Pronouncing Dictionary
+  if (length(arpabet1) == 0 || length(arpabet2) == 0) {
+    stop("Both words must be found in the CMU Pronouncing Dictionary to check for rhyme.")
+  }
+  
+  # Extract the last pieces of the ARPAbet codes
+  last_arpabet1 <- tail(strsplit(arpabet1, "\\s+")[[1]], 1)
+  last_arpabet2 <- tail(strsplit(arpabet2, "\\s+")[[1]], 1)
+  
+  # Check if the last pieces match
+  return(last_arpabet1 == last_arpabet2)
+}
+
+# Example usage to test if two words rhyme
+word1 <- "cool"
+word2 <- "fool"
+if (check_rhyme(word1, word2, cmudict_df)) {
+  print(paste(word1, "and", word2, "rhyme!"))
+} else {
+  print(paste(word1, "and", word2, "do not rhyme."))
+}
+
+
+```
+
+
+
+
