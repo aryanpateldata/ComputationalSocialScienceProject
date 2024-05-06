@@ -19,7 +19,7 @@ In practice, the word embeddings produced by CBOW are often effective at capturi
 
 The model was trained on around 1000 songs lyrics collected from scrapping Shazam Lyrics. Then we processed the data, and trained the model on the song lyrics and created an embedding matrix. Using this we
 created a similartiy matrix and then a function that would return the most similar words (in context not meaning) to the input word. We have used this approach for faster loading of the application
-as training word2vec on the data each time would be computationally expensive. 
+as training word2vec on the data each time would be computationally expensive.  The App will return a list of most similar words (contextually) shown by histogram and chart in first tab. in the second tab there is a word netword graph with slider that can also explain similar information. 
 
 
 Using the returned words from the application , someone can use this application to write and compose song lyrics as it was specifcally trained on song lyrics. Someone can enter for example if they wanted to use a word like "cash"
